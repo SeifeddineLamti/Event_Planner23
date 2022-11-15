@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 #include <event.h>
 #include <QMainWindow>
+#include "stat_combo.h"
+#include "window.h"
+#include "popup.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -42,9 +46,40 @@ private slots:
 
     void on_pushButton_10_clicked();
 
+    void display();
+
+    void on_pb_verfier_clicked();
+
+    void on_pb_verifier_clicked();
+
+    void on_pb_modifier_clicked();
+
+    void on_pb_chercher_clicked();
+
+    void on_pb_chercher_2_clicked();
+
+    void on_pb_trie_id_clicked();
+
+    void on_pdf_clicked();
+
+    void on_comboBox_activated(const QString &arg1);
+
+    void on_themebox_activated(const QString &arg1);
+
+    void on_langue_activated(const QString &arg1);
+
+    void on_pb_reminder_clicked();
+
 private:
     Ui::MainWindow *ui;
     Event E;
+    stat_combo *s;
+    Window *p;
+    Popup *popup;
+
+
+
+
 
 };
 #endif // MAINWINDOW_H

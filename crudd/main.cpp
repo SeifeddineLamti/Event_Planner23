@@ -4,6 +4,7 @@
 #include "connection.h"
 #include <iostream>
 #include <QtSql>
+#include "event.h"
 int main(int argc, char *argv[])
 {
         QApplication a(argc, argv);
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
         QMessageBox::information(nullptr, QObject::tr("database is open"),
                     QObject::tr("connection successful.\n"
                                 "Click Cancel to exit."), QMessageBox::Cancel);
+
 
 }
     else

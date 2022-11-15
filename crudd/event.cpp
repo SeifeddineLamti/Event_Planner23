@@ -7,6 +7,17 @@
 #include <QSqlQuery>
 #include <QFlags>
 #include "connection.h"
+#include <chrono>
+#include <thread>
+#include <QPdfWriter>
+#include <QPainter>
+#include <QDesktopServices>
+#include <QModelIndex>
+#include <QVariant>
+#include <QDate>
+
+
+
 
 
 using namespace std;
@@ -15,7 +26,7 @@ using namespace std;
 //id=0;nom="";prenom="";
 //}
 
-Event::Event(int id,QString type,QString date,int nombre_inv,int budget)
+Event::Event(int id,QString type,QDate date,int nombre_inv,int budget)
 {
     this->id=id;
     this->type=type;
@@ -31,7 +42,7 @@ QString Event::gettype()
 {
     return type;
 }
-QString Event::getdate()
+QDate Event::getdate()
 {
     return date;
 }
@@ -51,7 +62,7 @@ void Event::settype(QString type)
 {
     this->type=type;
 }
-void Event::setdate(QString date)
+void Event::setdate(QDate date)
 {
     this->date=date;
 }
@@ -114,10 +125,11 @@ QSqlQueryModel * Event::afficher()
     QSqlQueryModel * model = new QSqlQueryModel();
     model->setQuery("SELECT * FROM Event");
     model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID"));
-    model->setHeaderData(1,Qt::Horizontal,QObject::tr("type"));
-    model->setHeaderData(2,Qt::Horizontal,QObject::tr("date_event"));
-    model->setHeaderData(3,Qt::Horizontal,QObject::tr("nombre_inv"));
-    model->setHeaderData(4,Qt::Horizontal,QObject::tr("budget"));
+    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE"));
+    model->setHeaderData(2,Qt::Horizontal,QObject::tr("DATE D'EVENEMENT"));
+    model->setHeaderData(3,Qt::Horizontal,QObject::tr("NOMBRE DES INVITES"));
+    model->setHeaderData(4,Qt::Horizontal,QObject::tr("BUDGET"));
+
 
     return model;
 }
@@ -127,11 +139,15 @@ bool Event::ajouter()
 {
     QString id_string=QString::number(id);
     cout<<id<<endl;
+    //QString Category=comboBox->currentText();
     QString budget_string=QString::number(budget);
     QString nombre_inv_string=QString::number(nombre_inv);
+    //QDate date_string=QString::fromStdString("dd.MM.yyyy");
+
+
     QSqlQuery query;
     query.prepare("INSERT INTO Event (id,type,date_event,nombre_inv,budget)"
-                  "VALUES (:id,:type,:date_event,:nombre_inv,:budget)");
+                  "VALUES (:id,:type,:date,:nombre_inv,:budget)");
     query.bindValue(0,id_string);
     query.bindValue(1,type);
     query.bindValue(2,date);
@@ -160,3 +176,194 @@ bool Event::update()
     return true;
 
 }
+//void Event::controle()
+//{
+//    if(id==0)
+//    {
+//        ui->l_id->setText("verfier ID");
+//    }
+
+//}
+
+
+QSqlQueryModel * Event::chercher(int id,QString date,QString type)
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    QSqlQuery query;
+    query.prepare("SELECT * from event where id like :id OR date_event like :date OR type like :type ");
+    query.bindValue(":id",id);
+    query.bindValue(":date",date);
+    query.bindValue(":type",type);
+
+    query.exec();
+    model->setQuery(query);
+    model->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
+    model->setHeaderData(1, Qt::Horizontal, QObject::tr("TYPE"));
+    model->setHeaderData(2, Qt::Horizontal, QObject::tr("DATE D'EVENEMENT"));
+    model->setHeaderData(3, Qt::Horizontal, QObject::tr("NOMBRE DES INVITES"));
+    model->setHeaderData(4, Qt::Horizontal, QObject::tr("BUDHET"));
+
+
+    return model;
+}
+QSqlQueryModel* Event::cherchertype(QString recherche)
+{
+    QSqlQueryModel* model=new QSqlQueryModel();
+
+
+    model->setQuery("SELECT * FROM event where TYPE LIKE '"+recherche+"%'  OR LOWER(TYPE) LIKE '"+recherche+"%' OR UPPER(TYPE) LIKE '"+recherche+"%'");
+
+    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID"));
+    model->setHeaderData(1,Qt::Horizontal,QObject::tr("type"));
+    model->setHeaderData(2,Qt::Horizontal,QObject::tr("date_event"));
+    model->setHeaderData(3,Qt::Horizontal,QObject::tr("nombre_inv"));
+    model->setHeaderData(4,Qt::Horizontal,QObject::tr("budget"));
+    return model;
+}
+
+
+
+
+
+QSqlQueryModel * Event::trie_nbr()
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * FROM EVENT ORDER BY nombre_inv");
+    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID"));
+    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE"));
+    model->setHeaderData(2,Qt::Horizontal,QObject::tr("DATE_EVENT"));
+    model->setHeaderData(3,Qt::Horizontal,QObject::tr("NOMBRE_INV"));
+    model->setHeaderData(4,Qt::Horizontal,QObject::tr("BUDGET"));
+
+    return model;
+}
+QSqlQueryModel * Event::trie_id()
+{
+    QSqlQueryModel * model=new QSqlQueryModel();
+    model->setQuery("SELECT * FROM EVENT ORDER BY ID");
+    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID"));
+    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE"));
+    model->setHeaderData(2,Qt::Horizontal,QObject::tr("DATE_EVENT"));
+    model->setHeaderData(3,Qt::Horizontal,QObject::tr("NOMBRE_INV"));
+    model->setHeaderData(4,Qt::Horizontal,QObject::tr("BUDGET"));
+    return model;
+}
+
+//QSqlQueryModel * Event::Trier_ID_D()
+//{
+//    QSqlQueryModel * model=new QSqlQueryModel();
+//    model->setQuery("SELECT * FROM LOGEMENT ORDER BY ID_L DESC");
+//    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID_L"));
+//    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE_L"));
+//    model->setHeaderData(2,Qt::Horizontal,QObject::tr("PRIX_L"));
+//    model->setHeaderData(3,Qt::Horizontal,QObject::tr("ADRESSE_L"));
+//    model->setHeaderData(4,Qt::Horizontal,QObject::tr("MAIL_L"));
+//    model->setHeaderData(5,Qt::Horizontal,QObject::tr("NUM_TEL_L"));
+//    return model;
+//}
+//QSqlQueryModel * Event::Trier_ID_A()
+//{
+//    QSqlQueryModel * model=new QSqlQueryModel();
+//    model->setQuery("SELECT * FROM LOGEMENT ORDER BY ID_L ASC");
+//    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID_L"));
+//    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE_L"));
+//    model->setHeaderData(2,Qt::Horizontal,QObject::tr("PRIX_L"));
+//    model->setHeaderData(3,Qt::Horizontal,QObject::tr("ADRESSE_L"));
+//    model->setHeaderData(4,Qt::Horizontal,QObject::tr("MAIL_L"));
+//    model->setHeaderData(5,Qt::Horizontal,QObject::tr("NUM_TEL_L"));
+//    return model;
+//}
+
+//QSqlQueryModel * Event::Trier_adresse_A()
+//{
+//    QSqlQueryModel * model=new QSqlQueryModel();
+//    model->setQuery("SELECT * FROM LOGEMENT ORDER BY ADRESSE_L ASC ");
+//    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID_L"));
+//    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE_L"));
+//    model->setHeaderData(2,Qt::Horizontal,QObject::tr("PRIX_L"));
+//    model->setHeaderData(3,Qt::Horizontal,QObject::tr("ADRESSE_L"));
+//    model->setHeaderData(4,Qt::Horizontal,QObject::tr("MAIL_L"));
+//    model->setHeaderData(5,Qt::Horizontal,QObject::tr("NUM_TEL_L"));
+//    return model;
+//}
+//QSqlQueryModel * Event::Trier_adresse_D()
+//{
+//    QSqlQueryModel * model=new QSqlQueryModel();
+//    model->setQuery("SELECT * FROM LOGEMENT ORDER BY ADRESSE_L DESC ");
+//    model->setHeaderData(0,Qt::Horizontal,QObject::tr("ID_L"));
+//    model->setHeaderData(1,Qt::Horizontal,QObject::tr("TYPE_L"));
+//    model->setHeaderData(2,Qt::Horizontal,QObject::tr("PRIX_L"));
+//    model->setHeaderData(3,Qt::Horizontal,QObject::tr("ADRESSE_L"));
+//    model->setHeaderData(4,Qt::Horizontal,QObject::tr("MAIL_L"));
+//    model->setHeaderData(5,Qt::Horizontal,QObject::tr("NUM_TEL_L"));
+//    return model;
+//}
+//QSqlQueryModel* Event::getAllId()
+//{
+//    QSqlQueryModel* model=new QSqlQueryModel();
+
+//    model->setQuery("SELECT ID_L FROM LOGEMENT");
+
+//    return model;
+//}
+// bool  Event::controlTel(int tel)
+// {
+//     QString num= QString::number(tel);
+//         for(int i=0;i<num.length();i++)
+//         {
+//             if (num.length()==8)
+//             {
+//                 return false;
+//             }
+//         }
+//         return true;
+// }
+void Event::pdfprinter()
+{
+QPdfWriter pdf("C:/Users/a/Documents/crudddd/events.pdf");
+
+       QPainter painter(&pdf);
+
+
+      painter.setPen(Qt::red);
+      painter.setFont(QFont("Arial", 50));
+      painter.drawText(4000,1000,"EVENEMENT");
+
+      painter.drawRect(3800,1200,1700,500);
+      painter.drawRect(0,3000,9600,500);
+      painter.setPen(Qt::red);
+      painter.setFont(QFont("Arial", 11));
+      painter.drawText(500,3300,"ID");
+      painter.drawText(2000,3300,"TYPE");
+      painter.drawText(3500,3300,"DATE");
+      painter.drawText(4500,3300,"NB INVITES");
+      painter.drawText(6500,3300,"BUDGET");
+
+
+
+
+      QSqlQuery query;
+      int i = 4000;
+
+       query.prepare("select * from event");
+       query.exec();
+    while (query.next())
+      {
+          painter.setPen(Qt::black);
+          painter.setFont(QFont("Arial", 9));
+          painter.drawText(500,i,query.value(0).toString());
+          painter.drawText(1800,i,query.value(1).toString());
+          painter.drawText(3500,i,query.value(2).toString());
+          painter.drawText(5000,i,query.value(3).toString());
+          painter.drawText(6500,i,query.value(4).toString());
+
+
+          i = i +500;
+      }
+}
+
+
+
+
+
+
