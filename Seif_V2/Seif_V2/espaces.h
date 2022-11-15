@@ -2,6 +2,20 @@
 #define ESPACES_H
 #include <QSqlQueryModel>
 #include <QString>
+#include <QtCharts/QPieSlice>
+#include <QtCharts/QChartView>
+#include <QtWidgets/QMainWindow>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QLegend>
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QHorizontalStackedBarSeries>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QCategoryAxis>
+#include <QtCharts/QPieSeries>
+#include <QDebug>
+#include <qdebug.h>
+QT_CHARTS_USE_NAMESPACE
 class Espaces
 {
 public:
@@ -24,11 +38,15 @@ public:
             void SetPRIX_LOCATION(float val) { PRIX_LOCATION = val; }
             void SetDATE_LOCATION(QString val) { DATE_LOCATION = val; }
 
-            ;bool ajouter();
+            bool ajouter();
             QSqlQueryModel * afficher();
               bool Supprimer(QString x);
               bool modifier(QString x);
-
+         QSqlQueryModel * Recherche(QString x);
+         QSqlQueryModel * Trie_Type();
+         QSqlQueryModel * Trie_Prix();
+         QSqlQueryModel * Trie_Capacite();
+         QChart * Stat();
 private:
     int ID_ESPACE,CAPACITE;
     QString TYPE,NOM,LIEU,DATE_LOCATION;

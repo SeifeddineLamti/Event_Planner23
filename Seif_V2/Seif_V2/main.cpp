@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    Connection c;
+   Connection c;
     c.createconnect();
     MainWindow w;
     w.show();
