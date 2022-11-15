@@ -1,5 +1,15 @@
 QT       += core gui
 QT +=sql
+//arduino
+QT += printsupport
+QT += serialport
+//stat
+QT += core gui charts
+//qr
+CONFIG += enable_encoder_qr_code
+include(QZXing/QZXing.pri)
+
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11

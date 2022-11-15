@@ -6,12 +6,12 @@
 
 class Client
 {
-    QString nom,prenom,date_naissance,adresse_email;
+    QString nom,prenom,sexe,date_naissance,adresse_email;
     int cin,num_tel;
 public:
     //ctors
     Client(){};
-    Client(int,QString,QString,QString,int,QString);
+    Client(int,QString,QString,QString,QString,int,QString);
     //getters
     QString getNom(){return nom;}
     QString getPrenom(){return prenom;}
@@ -34,8 +34,15 @@ public:
     QSqlQueryModel * afficher();
     bool supprimer(int);
     bool modifier();
-    QSqlQueryModel * ordre_croissant();
-    QSqlQueryModel * ordre_decroissant();
+    QSqlQueryModel * tri_nom_croissant();
+    QSqlQueryModel * tri_nom_decroissant();
+    QSqlQueryModel * tri_prenom_croissant();
+    QSqlQueryModel * tri_prenom_decroissant();
+    QSqlQueryModel * tri_cin_croissant();
+    QSqlQueryModel * tri_cin_decroissant();
+    QSqlQueryModel * rech_cin(QString);
+    QSqlQueryModel * get_id();
+
 };
 
 #endif // CLIENT_H
