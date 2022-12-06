@@ -1,376 +1,311 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include"fournisseur.h"
-#include <QIntValidator>
+#include "espaces.h"
 #include <QMessageBox>
-#include <QFileDialog>
-#include "connection.h"
-#include <QFile>
+#include <QIntValidator>
 #include <QtDebug>
-#include<QPdfWriter>
-#include <QPainter>
+#include <string>
+#include "connection.h"
 #include <QSqlQuery>
-#include<QtCharts>
-
-#include<QPieSlice >
-#include<QPieSeries>
-#include<QPrinter>
-#include <QFileDialog>
-#include<QPrintDialog>
-#include <QIntValidator>
-#include <QValidator>
-#include <QMessageBox>
-#include <QDebug>
-#include <QIntValidator>
-#include <QSqlQueryModel>
-#include <QtCharts>
-#include <QChartView>
-#include <QLineSeries>
-#include<QDesktopServices>
-#include<QUrl>
-#include <QTextStream>
-#include <QTextDocument>
-#include <QtPrintSupport/QPrintDialog>
-#include <QtPrintSupport/QPrinter>
-#include <QtWidgets>
-#include<QFileDialog>
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include<QGraphicsView>
-#include<QPdfWriter>
-#include<QSqlQuery>
-#include<QSystemTrayIcon>
-#include <QtNetwork/QAbstractSocket>
-#include <QtNetwork/QSslSocket>
-#include<QUrlQuery>
-#include<QJsonDocument>
-#include<QJsonObject>
-#include<QJsonArray>
-#include <QDate>
-#include <QTime>
-#include<QSqlTableModel>
-#include<QItemSelectionModel>
-#include<QTableWidgetItem>
-#include <QDesktopWidget>
-#include <QCoreApplication>
-#include <QDateEdit>
-#include <QComboBox>
-#include <QPixmap>
-//#include <QMediaPlayer>
-#include <QTabWidget>
-#include <QObject>
-#include <QDialog>
-#include <QValidator>
-#include <QPropertyAnimation>
-#include <QEasingCurve>
-#include <QSequentialAnimationGroup>
-#include <QState>
-#include <QStateMachine>
-#include <QSignalTransition>
+#include <string>
 #include <QPainter>
-#include<QString>
-#include<QStatusBar>
-#include <QSound>
-#include<QTimer>
-#include<QDateTime>
- #include <QApplication>
-#include <QtCore>
+#include <QtPrintSupport/QPrinter>
+#include <QProcess>
+#include <QVector>
 
 
 
-
-MainWindow::MainWindow(QWidget *parent) :
-
-    QMainWindow(parent),
+using namespace std;
+MainWindow::MainWindow(QWidget *ESPACES) :
+    QMainWindow(ESPACES),
     ui(new Ui::MainWindow)
 {
-
     ui->setupUi(this);
-    ui->tab_FOURNISSEUR->setModel(f.afficher());
-    ui->lineEdit_cin_S->setValidator(new QIntValidator(0,99999999,this));
-       ui->lineEdit_CIN1->setValidator(new QIntValidator(0,99999999,this));
-    ui->lineEdit_cin->setValidator(new QIntValidator(0,99999999,this));
-    data="";
-        int ret=Ar.connect_arduino(); // lancer la connexion à arduino
-        switch(ret){
-        case(0):qDebug()<< "arduino is available and connected to : "<< Ar.getarduino_port_name();
-            break;
-        case(1):qDebug() << "arduino is available but not connected to :" <<Ar.getarduino_port_name();
+    int ret=a.connect_arduino();
+       switch (ret) {
+       case(0):qDebug()<<"arduino is available and connected to :"<<a.getarduino_port_name();
            break;
-        case(-1):qDebug() << "arduino is not available";
-        }
-         QObject::connect(Ar.getserial(),SIGNAL(readyRead()),this,SLOT(verif_id_arduino()));
-}
+       case(1):qDebug()<<"arduino is available but not connected to :"<<a.getarduino_port_name();
+           break;
+       case(-1):qDebug()<<"arduino is not available";
+       }
+ QObject::connect(a.getserial(),SIGNAL(readyRead()),this,SLOT(incendie()));
+    ui->tab_espaces->setModel(E.afficherEspaces());
+    QChartView *chartview = new QChartView(Espaces().StatEspaces(),ui->widget);
+    chartview->resize(500,400);
 
+}
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-void MainWindow::on_AJOUTER_clicked()
+
+
+void MainWindow::on_pb_ajouter_clicked()
 {
+    int ID_ESPACE=ui->le_ID->text().toInt();
+    int CAPACITE=ui->le_capacite->text().toInt();
+    QString NOM=ui->le_nom->text();
+    QString TYPE=ui->le_type->text();
+    QString LIEU=ui->le_lieu->text();
+    QString DATE_LOCATION=ui->le_datelocation->text();
+    int PRIX_LOCATION=ui->le_prixlocation->text().toInt();
+    Espaces E(ID_ESPACE,CAPACITE,NOM,TYPE,LIEU,DATE_LOCATION,PRIX_LOCATION);
+    bool test=false;
+    int check1=0,check2=0;
+    int i=0;
+    int test8=0;
+    string d=DATE_LOCATION.toStdString();
+    if ((d[2]=='/')&&(d[5]=='/')&&(d.length()==10))
+    {
+        test8=1;
 
-    QString NOM=ui->lineEdit_nom->text();
-    QString PRENOM=ui->lineEdit_pr->text();
-    int CIN=ui->lineEdit_cin->text().toInt();
-    QString PRODUIT=ui->lineEdit_pro->text();
-    int STOCK=ui->lineEdit_st->text().toInt();
+    }
+    string n=NOM.toStdString();
+    while((check1==0)&&(i<15)){
+        if (isdigit(n[i]))
+        check1=1;
+        i++;
 
-           fournisseur f ( NOM,PRENOM ,CIN, PRODUIT,STOCK);
+    }
+    i=0;
+  string n2=ui->le_type->text().toStdString();
+    while((check2==0)&&(i<15)){
+        if (isdigit(n2[i]))
+        check2=1;
+        i++;
 
-            bool test= f.ajouter();
-                           if(test){
-                               MainWindow w;
-                           w.show();
-                           QMessageBox::information(nullptr, QObject::tr("database is open"),
-                                       QObject::tr("Ajout effectué.\n"
-                                                   "Click Cancel to exit."), QMessageBox::Cancel);
-                              ui->tab_FOURNISSEUR->setModel(f.afficher());
-                       }
-                       else
-                           QMessageBox::critical(nullptr, QObject::tr("database is not open"),
-                                       QObject::tr("Ajout non effectué.\n"
-                                                   "Click Cancel to exit."), QMessageBox::Cancel);
+    }
+    if ((check1==0)&&(check2==0)&&(test8==1))
+    test=E.ajouterEspaces();
+    qDebug() << test;
+    QMessageBox msgBox;
+    if (test)
+        msgBox.setText("ajout avec succes");
+    else msgBox.setText("echec ajout");
+
+ui->tab_espaces->setModel(E.afficherEspaces());
+    msgBox.exec();
 
 }
 
-void MainWindow::on_SUPPRIMER_clicked()
+void MainWindow::on_SupprimerEspaces_clicked()
 {
-    fournisseur f1;
- f1.setCIN(ui->lineEdit_cin_S->text().toInt());
+    QString id=ui->le_ID->text();
+    bool test=false;
 
-bool test=f1.supprimer(f1.getCIN());
+    test=Espaces().SupprimerEspaces(id);
 QMessageBox msgBox;
-if(test)
-{
-
-   msgBox.setText("Suppression avec succes.");
-   ui->tab_FOURNISSEUR->setModel(f1.afficher());
-}
-else
-   msgBox.setText("Echec de suppression");
+    if (test)
+    {msgBox.setText("Suppression avec succes");
+     ui->tab_espaces->setModel(E.afficherEspaces());}
+        else msgBox.setText("echec Suppression");
+qDebug() << test;
 msgBox.exec();
 
+}
+
+void MainWindow::on_AjouterEspaces_clicked()
+{
+    int ID_ESPACE=ui->le_ID->text().toInt();
+    int CAPACITE=ui->le_capacite->text().toInt();
+    QString x= ui->le_ID->text();
+    QString NOM=ui->le_nom->text();
+    QString TYPE=ui->le_type->text();
+    QString LIEU=ui->le_lieu->text();
+    QString DATE_LOCATION=ui->le_datelocation->text();
+    int PRIX_LOCATION=ui->le_prixlocation->text().toInt();
+    Espaces E(ID_ESPACE,CAPACITE,NOM,TYPE,LIEU,DATE_LOCATION,PRIX_LOCATION);
+    bool test;
+    test=E.modifierEspaces(x);
+    QMessageBox msgBox;
+    if (test)
+        msgBox.setText("Modification avec succes");
+    else msgBox.setText("echec modification");
+
+ui->tab_espaces->setModel(E.afficherEspaces());
+    msgBox.exec();
 
 }
 
-
-
-
-void MainWindow::on_MODIFIER_clicked()
+void MainWindow::on_le_ID_editingFinished()
 {
-
-    QString NOM=ui->lineEdit_N_nom->text();
-    QString PRENOM=ui->lineEdit_N_prenom->text();
-    int CIN=ui->lineEdit_N_cin->text().toInt();
-    QString PRODUIT=ui->lineEdit_N_produit->text();
-    int STOCK=ui->lineEdit_N_stock->text().toInt();
-    int NCIN=ui->lineEdit_CIN1->text().toInt();
-
-           fournisseur f ( NOM,PRENOM ,CIN, PRODUIT,STOCK);
-
-            bool test= f.modifier(NCIN);
-                           if(test){
-                               MainWindow w;
-                           w.show();
-                           QMessageBox::information(nullptr, QObject::tr("database is open"),
-                                       QObject::tr("modifier effectué.\n"
-                                                   "Click Cancel to exit."), QMessageBox::Cancel);
-                              ui->tab_FOURNISSEUR->setModel(f.afficher());
-                       }
-                       else
-                           QMessageBox::critical(nullptr, QObject::tr("database is not open"),
-                                       QObject::tr("modification non effectué.\n"
-                                                   "Click Cancel to exit."), QMessageBox::Cancel);
-
-
-
+    QString id= ui->le_ID->text();
+    QSqlQuery q;
+    q.prepare("SELECT * FROM ESPACES where id_espace = :x");
+    q.bindValue(":x",id);
+    q.exec();
+    q.first();
+    ui->le_type->setText(q.value(1).toString());
+    ui->le_nom->setText(q.value(2).toString());
+    ui->le_lieu->setText(q.value(3).toString());
+    ui->le_capacite->setText(q.value(4).toString());
+    ui->le_datelocation->setText(q.value(6).toString());
+    ui->le_prixlocation->setText(q.value(5).toString());
 
 }
 
-void MainWindow::on_pushButton_7_clicked()
+void MainWindow::on_Recherche_clicked()
 {
-    QPdfWriter pdf("C:\\Users\\Chelly Emna\\Desktop\\PDF_Fournisseur.pdf");
-    
-           QPainter painter(&pdf);
-           int i = 4000;
-                  painter.setPen(Qt::red);
-                  painter.setFont(QFont("Time New Roman", 25));
-                  painter.drawText(3000,1400,"Liste Des Fournisseur");
-                  painter.setPen(Qt::black);
-                  painter.setFont(QFont("Time New Roman", 15));
-                  painter.drawRect(100,3000,9400,500);
-                  painter.setFont(QFont("Time New Roman", 9));
-                  painter.drawText(1000,3300,"NOM");
-                  painter.drawText(2500,3300,"PRENOM");
-                  painter.drawText(4000,3300,"CIN");
-                  painter.drawText(5500,3300,"PRODUIT");
-                  painter.drawText(7000,3300,"STOCK");
-                  painter.drawRect(100,3000,9400,9000);
-    
-                  QSqlQuery query;
-                  query.prepare("select * from FOURNISSEUR");
-                  query.exec();
-                  while (query.next())
-                  {
-                      painter.drawText(1000,i,query.value(0).toString());
-                      painter.drawText(2500,i,query.value(1).toString());
-                      painter.drawText(4000,i,query.value(2).toString());
-                      painter.drawText(5500,i,query.value(3).toString());
-                      painter.drawText(7000,i,query.value(4).toString());
-    
-    
-                     i = i + 350;
-                  }
-                  QMessageBox::information(this, QObject::tr("PDF Enregistré!"),
-                  QObject::tr("PDF Enregistré!.\n" "Click Cancel to exit."), QMessageBox::Cancel);  
+    QString x=ui->recherche->text();
+    ui->tab_espaces->setModel(Espaces().RechercheEspaces(x));
+}
+
+void MainWindow::on_AnnulerRecherche_clicked()
+{
+    ui->tab_espaces->setModel(E.afficherEspaces());
+}
+
+void MainWindow::on_ConfimerTrie_clicked()
+{
+QString x=ui->Trie->currentText();
+if (x=="Prix")
+    ui->tab_espaces->setModel(Espaces().Trie_Prix());
+else if (x=="Type")
+    ui->tab_espaces->setModel(Espaces().Trie_Type());
+else if (x=="Capacité")
+    ui->tab_espaces->setModel(Espaces().Trie_Capacite());
+}
+
+void MainWindow::on_Exporter_clicked()
+{
+    QString pdf=ui->pdf->text();
+    QPixmap pix(ui->widget->size());
+    QPainter painter(&pix);
+    ui->widget->render(&painter);
+    painter.end();
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOrientation(QPrinter::Landscape);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setPaperSize(QPrinter::A4);
+    QString Emplacement = "D:\\ " + pdf + ".pdf";
+
+    printer.setOutputFileName(Emplacement);
+
+    painter.begin(&printer);
+    double xscale = printer.pageRect().width() / double(pix.width());
+    double yscale = printer.pageRect().height() / double(pix.height());
+    double scale = qMin(xscale, yscale);
+   painter.translate(printer.paperRect().x() + printer.pageRect().width() / 2, // largeur
+                    printer.paperRect().y() + printer.pageRect().height() / 2);
+    painter.scale(scale, scale);
+   painter.translate(-(ui->widget->width()) / 2, -(ui->widget->height()) / 2); // hauteur
+    painter.drawPixmap(0, 0, pix);
+    painter.end();
+}
+
+void MainWindow::on_Map_clicked()
+{
+    QString chemin="D:/build-MapTest-Desktop_Qt_5_9_9_MinGW_32bit-Debug/debug/MapTest.exe";
+
+    QProcess *x = new QProcess(this);
+qDebug()<< chemin;
+    x->start(chemin);
 }
 
 
-
-
-void MainWindow::on_le_recherche_textChanged(const QString &arg)
+void MainWindow::on_calendar_clicked()
 {
-    QString rech=ui->le_recherche->text();
-    ui->tab_FOURNISSEUR->setModel(f.Recherchefournisseur(rech));
-}
+    QDate datee=ui->calendar->selectedDate();
+        qDebug() << datee;
+        QString d= datee.toString("dd/MM/yyyy");
+        qDebug() << d;
+        QSqlQuery query;
+        query.prepare("SELECT id_espace,nom from espaces where date_location = :date");
+        query.bindValue(":date",d);
+        query.exec();
+        QSqlQueryModel * model=new QSqlQueryModel();
 
 
+              model->setQuery(query);
+              model->setHeaderData(0, Qt::Horizontal, QObject::tr("Identifiant"));
 
-
-
-void MainWindow::on_pushButton_8_clicked()
-{
-    QSqlQueryModel * model= new QSqlQueryModel();
-                             model->setQuery("select * from FOURNISSEUR where STOCK< 100 ");
-                             float code=model->rowCount();
-                             model->setQuery("select * from FOURNISSEUR where STOCK between 100 and 1000 ");
-                             float codee=model->rowCount();
-                             model->setQuery("select * from  FOURNISSEUR  where STOCK >1000 ");
-                             float codeee=model->rowCount();
-                             float total=code+codee+codeee;
-                             QString a=QString("moins de 100 \t"+QString::number((code*100)/total,'f',2)+"%" );
-                             QString b=QString("entre 100 et 1000 \t"+QString::number((codee*100)/total,'f',2)+"%" );
-                             QString c=QString("+1000 \t"+QString::number((codeee*100)/total,'f',2)+"%" );
-                             QPieSeries *series = new QPieSeries();
-                             series->append(a,code);
-                             series->append(b,codee);
-                             series->append(c,codeee);
-                     if (code!=0)
-                     {QPieSlice *slice = series->slices().at(0);
-                      slice->setLabelVisible();
-                      slice->setPen(QPen());}
-                     if ( codee!=0)
-                     {
-                              // Add label, explode and define brush for 2nd slice
-                              QPieSlice *slice1 = series->slices().at(1);
-                              //slice1->setExploded();
-                              slice1->setLabelVisible();
-                     }
-                     if(codeee!=0)
-                     {
-                              // Add labels to rest of slices
-                              QPieSlice *slice2 = series->slices().at(2);
-                              //slice1->setExploded();
-                              slice2->setLabelVisible();
-                     }
-                             // Create the chart widget
-                             QChart *chart = new QChart();
-                             // Add data to chart with title and hide legend
-                             chart->addSeries(series);
-                             chart->setTitle("Pourcentage Par STOCK :Nombre Des Espaces "+ QString::number(total));
-                             chart->legend()->hide();
-                             // Used to display the chart
-                             QChartView *chartView = new QChartView(chart);
-                             chartView->setRenderHint(QPainter::Antialiasing);
-                             chartView->resize(1000,500);
-                             chartView->show();
+              model->setHeaderData(1, Qt::Horizontal, QObject::tr("Nom"));
+             ui->tableCalendrier1->setModel(model);
 
 
 
 
 }
 
-
-void MainWindow::on_pushButton_clicked()
-{
-    fournisseur P;
-       ui->tab_FOURNISSEUR->setModel(f.tri_cincroissant());
-
-           bool test=P.tri_cincroissant();// tri produit
-           if (test)
-           {
-
-
-               QMessageBox::information(nullptr,QObject::tr("ok"),
-                                        QObject::tr("tri croissante effectué \n"
-                                                    "Click Cancel to exist ."),QMessageBox::Cancel);
-
-           }
-           else
-            {    QMessageBox::critical(nullptr, QObject::tr("nonnnn"),
-                             QObject::tr("tri croissante failed.\n"
-                                         "Click Cancel to exit."), QMessageBox::Cancel);}
-
-       }
-
-
-void MainWindow::on_pb_envoyer_clicked()
+void MainWindow::on_tableCalendrier1_clicked(const QModelIndex &index)
 {
 
 
-   fournisseur p;
-   p.setNOM(ui->le_id_chat->text());
-    p.setPRODUIT(ui->le_message->text());
-    QMessageBox msgbox;
-    bool test=p.ajouterMessage(p.getNOM());
-    if(test)
+   QString i=index.data().toString();
+   QSqlQuery query;
+   query.prepare("Select * from espaces where id_espace = :id");
+   query.bindValue(":id",i);
+   qDebug() << i;
+   query.exec();
+   QSqlQueryModel * model=new QSqlQueryModel();
+
+
+         model->setQuery(query);
+         model->setHeaderData(0, Qt::Horizontal, QObject::tr("Identifiant"));
+         model->setHeaderData(1, Qt::Horizontal, QObject::tr("Type"));
+         model->setHeaderData(2, Qt::Horizontal, QObject::tr("Nom"));
+         model->setHeaderData(3, Qt::Horizontal, QObject::tr("Lieu"));
+         model->setHeaderData(4, Qt::Horizontal, QObject::tr("Capacite"));
+         model->setHeaderData(5, Qt::Horizontal, QObject::tr("Prix De Location"));
+         model->setHeaderData(6, Qt::Horizontal, QObject::tr("Date De Location"));
+
+
+        ui->tableCalendrier2->setModel(model);
+
+
+}
+
+
+
+
+
+
+
+void MainWindow::incendie()
+{
+
+    data=a.read_from_arduino();
+    bool test=false;
+    qDebug() << data;
+    if((data=="1")&&(test==false))
     {
-        msgbox.setText("un nouveau message");
-        ui->tab_message->setModel(p.afficherMessage());
+        QMessageBox qbox;
+        qbox.setText("DANGER!!!");
+        qbox.setIcon(QMessageBox::Critical);
+        qbox.exec();
+        ui->tabWidget->setCurrentIndex(3);
+        ui->stop->setEnabled(true);
+        test=true;
+
     }
-    else
-        msgbox.setText("probleme d'envoie de message");
-    msgbox.exec();
+}
+
+
+
+void MainWindow::on_stop_clicked()
+{
+    QString datee;
+    QSqlQuery query;
+
+    a.write_to_arduino("7");
+    E.ajouterI(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm"));
+    query.prepare("Select datei from hisincendie ");
+    if(query.exec())
+    {
+        while(query.next())
+        {
+            datee=query.value(0).toString();
+
+        }
+
+    }
+    qDebug()<<datee;
+    QByteArray datef(datee.toUtf8(),16)    ;
+    a.write_to_arduino(datef);
+      ui->stop->setEnabled(false);
 
 }
-void MainWindow::verif_id_arduino()
-{
-data="";
-QString a;
- data=Ar.read_from_arduino()/*[0]*/;
-     a.append(data);
 
 
-     if(a.length()==4)
-     {qDebug()<<a;
-         /*QSqlQueryModel *model=new QSqlQueryModel();
-         model->setQuery("SELECT * FROM FOURNISSEUR where CIN ="+data);
-         if (model->rowCount()==0){
-             Ar.write_to_arduino("CIN erroné");
-             qDebug()<<"CIN erroné";
-         }
-         else{
-                 QByteArray nom = model->data(model->index(0,0)).toByteArray();
-                 Ar.write_to_arduino("bonjour "+nom);
-
-                 qDebug()<<"bonjour "<<nom;
-             }
-
-         }else
-            {
-             if (a=='1' || a=='2' || a=='3' || a=='4' || a=='5' || a=='6' || a=='7' || a=='8' || a=='9' )
-             data+=a;}
-         qDebug()<<data;*/
-
-     } }
-
-
-void MainWindow::on_sendBtn_clicked()
-{
-    ui->server->setPlaceholderText("smtp.gmail.com");
-    ui->port->setPlaceholderText("465");
-
-
-
-}
