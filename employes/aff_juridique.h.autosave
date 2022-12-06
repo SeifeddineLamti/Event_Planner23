@@ -1,0 +1,43 @@
+#ifndef AFF_JURIDIQUE_H
+#define AFF_JURIDIQUE_H
+
+#include <QString>
+#include <QSqlQueryModel>
+
+class EMPLOYES
+{
+public:
+    EMPLOYES();
+     EMPLOYES(QString,QString,QString,QString, int,QString);
+     QString getID_EMPLOYES();
+     QString getNOM();
+     QString getPRENOM();
+     QString getADRESSE_EMAIL();
+       int getNUM_TEL();
+       QString getADRESSE();
+    
+     void setID_EMPLOYES(QString);
+     void setNOM(QString);
+     void setPRENOM(QString);
+     void setADRESSE_EMAIL(QString);
+      void setNUM_TEL(int);
+     void setADRESSE(QString);
+     
+     bool ajouter();
+     QSqlQueryModel* afficher();
+     bool supprimer(int);
+     bool modifier(QString ID_EMPLOYES);
+private:
+    
+    QString ID_EMPLOYES ;
+    QString ;AD
+    QString ;
+    QString ;
+    int;
+    QString ;
+
+
+
+};
+
+#endif // AFF_JURIDIQUE_H
