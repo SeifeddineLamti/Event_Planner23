@@ -1,6 +1,10 @@
 #include "arduino.h"
+<<<<<<< HEAD:Seif/Seif_V2/arduino.cpp
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+=======
+
+>>>>>>> bbecb6a7d4ebc4728b1e271c87baf1d1ab44c82f:arduino.cpp
 Arduino::Arduino()
 {
     data="";
