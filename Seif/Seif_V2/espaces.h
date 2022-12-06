@@ -29,7 +29,7 @@ public:
             float GetPRIX_LOCATION() { return PRIX_LOCATION; }
             QString GetDATE_LOCATION() { return DATE_LOCATION; }
 
-
+void ajouterI(QString);
             void setID_ESPACE(int val) { ID_ESPACE = val; }
             void setCAPACITE(int val) { CAPACITE = val; }
             void SetNOM(QString val) { NOM = val; }
@@ -38,15 +38,15 @@ public:
             void SetPRIX_LOCATION(float val) { PRIX_LOCATION = val; }
             void SetDATE_LOCATION(QString val) { DATE_LOCATION = val; }
 
-            bool ajouter();
-            QSqlQueryModel * afficher();
-              bool Supprimer(QString x);
-              bool modifier(QString x);
-         QSqlQueryModel * Recherche(QString x);
+            bool ajouterEspaces();
+            QSqlQueryModel * afficherEspaces();
+              bool SupprimerEspaces(QString x);
+              bool modifierEspaces(QString x);
+         QSqlQueryModel * RechercheEspaces(QString x);
          QSqlQueryModel * Trie_Type();
          QSqlQueryModel * Trie_Prix();
          QSqlQueryModel * Trie_Capacite();
-         QChart * Stat();
+         QChart * StatEspaces();
 private:
     int ID_ESPACE,CAPACITE;
     QString TYPE,NOM,LIEU,DATE_LOCATION;

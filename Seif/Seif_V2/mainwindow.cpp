@@ -12,14 +12,26 @@
 #include <QtPrintSupport/QPrinter>
 #include <QProcess>
 #include <QVector>
+
+
+
 using namespace std;
 MainWindow::MainWindow(QWidget *ESPACES) :
     QMainWindow(ESPACES),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->tab_espaces->setModel(E.afficher());
-    QChartView *chartview = new QChartView(Espaces().Stat(),ui->widget);
+    int ret=a.connect_arduino();
+       switch (ret) {
+       case(0):qDebug()<<"arduino is available and connected to :"<<a.getarduino_port_name();
+           break;
+       case(1):qDebug()<<"arduino is available but not connected to :"<<a.getarduino_port_name();
+           break;
+       case(-1):qDebug()<<"arduino is not available";
+       }
+ QObject::connect(a.getserial(),SIGNAL(readyRead()),this,SLOT(incendie()));
+    ui->tab_espaces->setModel(E.afficherEspaces());
+    QChartView *chartview = new QChartView(Espaces().StatEspaces(),ui->widget);
     chartview->resize(500,400);
 
 }
@@ -66,35 +78,35 @@ void MainWindow::on_pb_ajouter_clicked()
 
     }
     if ((check1==0)&&(check2==0)&&(test8==1))
-    test=E.ajouter();
+    test=E.ajouterEspaces();
     qDebug() << test;
     QMessageBox msgBox;
     if (test)
         msgBox.setText("ajout avec succes");
     else msgBox.setText("echec ajout");
 
-ui->tab_espaces->setModel(E.afficher());
+ui->tab_espaces->setModel(E.afficherEspaces());
     msgBox.exec();
 
 }
 
-void MainWindow::on_pushButton_3_clicked()
+void MainWindow::on_SupprimerEspaces_clicked()
 {
     QString id=ui->le_ID->text();
     bool test=false;
 
-    test=Espaces().Supprimer(id);
+    test=Espaces().SupprimerEspaces(id);
 QMessageBox msgBox;
     if (test)
     {msgBox.setText("Suppression avec succes");
-     ui->tab_espaces->setModel(E.afficher());}
+     ui->tab_espaces->setModel(E.afficherEspaces());}
         else msgBox.setText("echec Suppression");
 qDebug() << test;
 msgBox.exec();
 
 }
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_AjouterEspaces_clicked()
 {
     int ID_ESPACE=ui->le_ID->text().toInt();
     int CAPACITE=ui->le_capacite->text().toInt();
@@ -106,13 +118,13 @@ void MainWindow::on_pushButton_2_clicked()
     int PRIX_LOCATION=ui->le_prixlocation->text().toInt();
     Espaces E(ID_ESPACE,CAPACITE,NOM,TYPE,LIEU,DATE_LOCATION,PRIX_LOCATION);
     bool test;
-    test=E.modifier(x);
+    test=E.modifierEspaces(x);
     QMessageBox msgBox;
     if (test)
         msgBox.setText("Modification avec succes");
     else msgBox.setText("echec modification");
 
-ui->tab_espaces->setModel(E.afficher());
+ui->tab_espaces->setModel(E.afficherEspaces());
     msgBox.exec();
 
 }
@@ -134,20 +146,20 @@ void MainWindow::on_le_ID_editingFinished()
 
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_Recherche_clicked()
 {
     QString x=ui->recherche->text();
-    ui->tab_espaces->setModel(Espaces().Recherche(x));
+    ui->tab_espaces->setModel(Espaces().RechercheEspaces(x));
 }
 
-void MainWindow::on_pushButton_4_clicked()
+void MainWindow::on_AnnulerRecherche_clicked()
 {
-    ui->tab_espaces->setModel(E.afficher());
+    ui->tab_espaces->setModel(E.afficherEspaces());
 }
 
-void MainWindow::on_pushButton_5_clicked()
+void MainWindow::on_ConfimerTrie_clicked()
 {
-QString x=ui->comboBox->currentText();
+QString x=ui->Trie->currentText();
 if (x=="Prix")
     ui->tab_espaces->setModel(Espaces().Trie_Prix());
 else if (x=="Type")
@@ -156,7 +168,7 @@ else if (x=="Capacité")
     ui->tab_espaces->setModel(Espaces().Trie_Capacite());
 }
 
-void MainWindow::on_pushButton_6_clicked()
+void MainWindow::on_Exporter_clicked()
 {
     QString pdf=ui->pdf->text();
     QPixmap pix(ui->widget->size());
@@ -183,7 +195,7 @@ void MainWindow::on_pushButton_6_clicked()
     painter.end();
 }
 
-void MainWindow::on_pushButton_7_clicked()
+void MainWindow::on_Map_clicked()
 {
     QString chemin="D:/build-MapTest-Desktop_Qt_5_9_9_MinGW_32bit-Debug/debug/MapTest.exe";
 
@@ -193,7 +205,7 @@ qDebug()<< chemin;
 }
 
 
-void MainWindow::on_calendar_clicked(const QDate &date)
+void MainWindow::on_calendar_clicked()
 {
     QDate datee=ui->calendar->selectedDate();
         qDebug() << datee;
@@ -210,14 +222,14 @@ void MainWindow::on_calendar_clicked(const QDate &date)
               model->setHeaderData(0, Qt::Horizontal, QObject::tr("Identifiant"));
 
               model->setHeaderData(1, Qt::Horizontal, QObject::tr("Nom"));
-             ui->tableView->setModel(model);
+             ui->tableCalendrier1->setModel(model);
 
 
 
 
 }
 
-void MainWindow::on_tableView_clicked(const QModelIndex &index)
+void MainWindow::on_tableCalendrier1_clicked(const QModelIndex &index)
 {
 
 
@@ -240,7 +252,60 @@ void MainWindow::on_tableView_clicked(const QModelIndex &index)
          model->setHeaderData(6, Qt::Horizontal, QObject::tr("Date De Location"));
 
 
-        ui->tableView_2->setModel(model);
+        ui->tableCalendrier2->setModel(model);
 
 
 }
+
+
+
+
+
+
+
+void MainWindow::incendie()
+{
+
+    data=a.read_from_arduino();
+    bool test=false;
+    qDebug() << data;
+    if((data=="1")&&(test==false))
+    {
+        QMessageBox qbox;
+        qbox.setText("DANGER!!!");
+        qbox.setIcon(QMessageBox::Critical);
+        qbox.exec();
+        ui->tabWidget->setCurrentIndex(3);
+        ui->stop->setEnabled(true);
+        test=true;
+
+    }
+}
+
+
+
+void MainWindow::on_stop_clicked()
+{
+    QString datee;
+    QSqlQuery query;
+
+    a.write_to_arduino("7");
+    E.ajouterI(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm"));
+    query.prepare("Select datei from hisincendie ");
+    if(query.exec())
+    {
+        while(query.next())
+        {
+            datee=query.value(0).toString();
+
+        }
+
+    }
+    qDebug()<<datee;
+    QByteArray datef(datee.toUtf8(),16)    ;
+    a.write_to_arduino(datef);
+      ui->stop->setEnabled(false);
+
+}
+
+

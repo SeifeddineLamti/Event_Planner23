@@ -23,8 +23,17 @@ Espaces::Espaces(int ID_ESPACE,int CAPACITE,QString NOM,QString TYPE,QString LIE
     this->DATE_LOCATION=DATE_LOCATION;
     this->PRIX_LOCATION=PRIX_LOCATION;
 }
+void Espaces::ajouterI(QString dateI){
+    QSqlQuery query;
+          query.prepare("INSERT INTO hisincendie (datei)"
+                        "VALUES (:datei)");
 
-bool Espaces::ajouter()
+          query.bindValue(":datei", dateI);
+
+
+           query.exec();
+}
+bool Espaces::ajouterEspaces()
 {
 
 
@@ -43,7 +52,7 @@ bool Espaces::ajouter()
           return query.exec();
 }
 
-QSqlQueryModel * Espaces::afficher()
+QSqlQueryModel * Espaces::afficherEspaces()
 {
     QSqlQueryModel * model=new QSqlQueryModel();
 
@@ -61,7 +70,7 @@ QSqlQueryModel * Espaces::afficher()
 
     return model;
 }
-bool Espaces::Supprimer(QString x)
+bool Espaces::SupprimerEspaces(QString x)
 {
     QSqlQuery query;
     query.prepare("Delete from espaces where id_espace = :id");
@@ -69,7 +78,7 @@ bool Espaces::Supprimer(QString x)
     return query.exec();
 
 }
-bool Espaces::modifier(QString x){
+bool Espaces::modifierEspaces(QString x){
     QSqlQuery query;
           query.prepare("update espaces set type = :TYPE , nom = :NOM , lieu = :LIEU , capacite = :CAPACITE,prix_location = :PRIX_LOCATION, date_location=:DATE_LOCATION where id_espace = :x");
           query.bindValue(":x", x);
@@ -89,7 +98,7 @@ bool Espaces::modifier(QString x){
 
 
 }
-QSqlQueryModel * Espaces::Recherche(QString x){
+QSqlQueryModel * Espaces::RechercheEspaces(QString x){
 
     QSqlQuery query;
     query.prepare("SELECT *FROM Espaces where Id_espace = :x or type = :x or nom = :x or capacite = :x or lieu = :x or prix_location = :x or date_location = :x");
@@ -187,7 +196,7 @@ QSqlQueryModel * Espaces::Trie_Prix(){
 
 
 }
-QChart * Espaces::Stat(){
+QChart * Espaces::StatEspaces(){
 
     QSqlQuery query,query1,query2,query3;
     query.exec("Select * from espaces");

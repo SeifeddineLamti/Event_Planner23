@@ -60,14 +60,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="AjouterEspaces">
           <property name="text">
            <string>MODIFIER</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="SupprimerEspaces">
           <property name="text">
            <string>SUPPRIMER</string>
           </property>
@@ -180,7 +180,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton">
+     <widget class="QPushButton" name="Recherche">
       <property name="geometry">
        <rect>
         <x>220</x>
@@ -203,7 +203,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_4">
+     <widget class="QPushButton" name="AnnulerRecherche">
       <property name="geometry">
        <rect>
         <x>330</x>
@@ -229,7 +229,7 @@
        <string>Trie</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBox">
+     <widget class="QComboBox" name="Trie">
       <property name="geometry">
        <rect>
         <x>70</x>
@@ -254,7 +254,7 @@
        </property>
       </item>
      </widget>
-     <widget class="QPushButton" name="pushButton_5">
+     <widget class="QPushButton" name="ConfimerTrie">
       <property name="geometry">
        <rect>
         <x>230</x>
@@ -267,7 +267,7 @@
        <string>Confirmer</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_7">
+     <widget class="QPushButton" name="Map">
       <property name="geometry">
        <rect>
         <x>450</x>
@@ -313,7 +313,7 @@
        <string>Statistique</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="pushButton_6">
+     <widget class="QPushButton" name="Exporter">
       <property name="geometry">
        <rect>
         <x>810</x>
@@ -351,7 +351,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QTableView" name="tableView">
+     <widget class="QTableView" name="tableCalendrier1">
       <property name="geometry">
        <rect>
         <x>420</x>
@@ -361,7 +361,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QTableView" name="tableView_2">
+     <widget class="QTableView" name="tableCalendrier2">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -369,6 +369,27 @@
         <width>871</width>
         <height>151</height>
        </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_5">
+     <attribute name="title">
+      <string>Page</string>
+     </attribute>
+     <widget class="QPushButton" name="stop">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>250</x>
+        <y>120</y>
+        <width>171</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>STOP</string>
       </property>
      </widget>
     </widget>
